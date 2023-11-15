@@ -1,6 +1,6 @@
 package ulpgc.dacd.moralesjorge.model;
 
-import java.time.Instant;
+import java.sql.Timestamp;
 
 public class Weather {
     private double temperature;
@@ -9,9 +9,9 @@ public class Weather {
     private double wind;
     private double clouds;
     private Location location;
-    private Instant timestamp;
+    private String timestamp;
 
-    public Weather(double temperature, double humidity, double rain, double wind, double clouds, Location location, Instant timestamp) {
+    public Weather(double temperature, double humidity, double rain, double wind, double clouds, Location location, String timestamp) {
         this.temperature = temperature;
         this.humidity = humidity;
         this.rain = rain;
@@ -69,11 +69,11 @@ public class Weather {
         this.location = location;
     }
 
-    public Instant getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Instant timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 }

@@ -11,16 +11,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
-public abstract class OpenWeatherMapProvider implements WeatherProvider {
+public class OpenWeatherMapProvider implements WeatherProvider {
     private static final String TEMPLATE_URL = "https://api.openweathermap.org/data/2.5/forecast?";
     public static final String API_KEY = "44cbf52007efea1adb20817923cf5c15\n";
     private List<Weather> weatherList;
+
+    public List<Weather> getWeatherList() {
+        return weatherList;
+    }
 
     public void getWeather(Location location, Instant timestamp) throws IOException {
         try {
@@ -55,14 +56,5 @@ public abstract class OpenWeatherMapProvider implements WeatherProvider {
             } catch (IOException | JsonSyntaxException e) {
             throw new RuntimeException(e);
         }
-
     }
-
-
-
-    }
-
-
-
-
 }
