@@ -1,4 +1,12 @@
 package ulpgc.dacd.moralesjorge.control;
 
-public class SQLiteWeatherStore {
+import java.sql.*;
+
+public abstract class SQLiteWeatherStore implements WeatherStore {
+
+    }
+
+
+
+
 }
