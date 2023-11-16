@@ -1,9 +1,9 @@
 package ulpgc.dacd.moralesjorge.control;
 
 import ulpgc.dacd.moralesjorge.model.Location;
-import ulpgc.dacd.moralesjorge.model.Weather;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class WeatherController {
     private WeatherProvider provider;
     private WeatherStore store;
 
-    List<Location> locations = locationsFromFile("locations.csv");
+    List<Location> locations = locationsFromFile("C:\\Users\\tomas\\Desktop\\DACD\\OpenWeatherMap\\src\\main\\resources\\locations.csv");
 
     public static List<Location> locationsFromFile(String path) {
         List<Location> locations = new ArrayList<>();
@@ -31,7 +31,11 @@ public class WeatherController {
                 Location location = new Location(island, latitude, longitude);
                 locations.add(location);
             }
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: No se encontró el archivo: " + path);
+            e.printStackTrace();
         } catch (Exception e) {
+            System.err.println("Error al leer el archivo: " + path);
             e.printStackTrace();
         }
         return locations;

@@ -1,60 +1,117 @@
 package ulpgc.dacd.moralesjorge.control;
+
 import com.google.gson.*;
 import ulpgc.dacd.moralesjorge.model.Location;
 import ulpgc.dacd.moralesjorge.model.Weather;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OpenWeatherMapProvider implements WeatherProvider {
-    private static final String TEMPLATE_URL = "https://api.openweathermap.org/data/2.5/forecast?";
-    public static final String API_KEY = "44cbf52007efea1adb20817923cf5c15\n";
+    private static final String TEMPLATE_URL = "https://api.openweathermap.org/data/2.5/forecast";
+    private static final String API_KEY = "44cbf52007efea1adb20817923cf5c15";
     private List<Weather> weatherList;
+
+    public OpenWeatherMapProvider() {
+        this.weatherList = new ArrayList<>();
+    }
 
     public List<Weather> getWeatherList() {
         return weatherList;
     }
 
-    public void getWeather(Location location, Instant timestamp) throws IOException {
+    public String getWeather(Location location, Instant timestamp) {
         try {
-            String APU_URL = String.format("%s?q=%s&appid=%s", TEMPLATE_URL, location, API_KEY);
-            URL url = new URL(APU_URL);
+            String API_URL = buildAPIURL(location);
+            String jsonResponse = makeAPIRequest(API_URL);
 
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            List<Weather> weather = parseWeatherData(jsonResponse);
+            weatherList.addAll(weather);
+            return jsonResponse;
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-
-            reader.close();
-
-            JsonElement jsonResponse = JsonParser.parseString(response.toString());
-            JsonObject main = jsonResponse.getAsJsonObject().getAsJsonObject("main");
-            double temperature = main.getAsJsonPrimitive("temp").getAsDouble();
-            double humidity = main.getAsJsonPrimitive("humidity").getAsDouble();
-            double wind_speed = jsonResponse.getAsJsonObject().getAsJsonObject("wind").get("speed").getAsDouble();
-            double clouds = jsonResponse.getAsJsonObject().getAsJsonObject("clouds").get("all").getAsDouble();
-            double precipitation = main.getAsJsonPrimitive("pop").getAsDouble();
-
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-            String time = dateFormat.format(currentTime);
-
-            Location location_api = new Location("Gran Canaria", 28.12, -15.43);
-
-            Weather weather = new Weather(temperature, humidity, precipitation, wind_speed, clouds, location_api, time);
-            weatherList.add(weather);
-
-            } catch (IOException | JsonSyntaxException e) {
+        } catch (IOException | JsonSyntaxException e) {
+            handleException(e);
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+        return null;
+    }
+
+    private String buildAPIURL(Location location) {
+        return String.format("%s?lat=%s&lon=%s&appid=%s", TEMPLATE_URL, location.getLatitude(), location.getLongitude(), API_KEY);
+    }
+
+    private String makeAPIRequest(String apiUrl) throws IOException {
+        URL url = new URL(apiUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            return response.toString();
+        }
+    }
+
+    List<Weather> parseWeatherData(String jsonResponse) throws ParseException {
+        List<Weather> weatherList = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        JsonParser parser = new JsonParser();
+        JsonObject responseObject = parser.parse(jsonResponse).getAsJsonObject();
+
+        JsonArray list = responseObject.getAsJsonArray("list");
+
+        for (int i = 0; i < list.size(); i++) {
+            JsonObject weatherData = list.get(i).getAsJsonObject();
+            String dataTimeString = weatherData.get("dt_txt").getAsString();
+
+            if (isMidday(dataTimeString) && isWithinNext7Days(dataTimeString)) {
+                JsonObject main = weatherData.getAsJsonObject("main");
+                double temperature = main.getAsJsonPrimitive("temp").getAsDouble();
+                double humidity = main.getAsJsonPrimitive("humidity").getAsDouble();
+                double wind_speed = weatherData.getAsJsonObject().getAsJsonObject("wind").get("speed").getAsDouble();
+                double clouds = weatherData.getAsJsonObject().getAsJsonObject("clouds").get("all").getAsDouble();
+
+                Location location_api = new Location("Gran Canaria", 28.12, -15.43);
+
+
+                Weather weather = new Weather(temperature, humidity, 0, wind_speed, clouds, location_api, dataTimeString);
+                weatherList.add(weather);
+            }
+        }
+        return weatherList;
+    }
+
+    private boolean isMidday(String dateTimeString) {
+        return dateTimeString.endsWith("12:00:00");
+    }
+
+    private boolean isWithinNext7Days(String dateTimeString) throws ParseException, ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date currentDate = new Date();
+        Date weatherDate = dateFormat.parse(dateTimeString);
+
+        long differenceInMilliseconds = weatherDate.getTime() - currentDate.getTime();
+        long differenceInDays = differenceInMilliseconds / (24 * 60 * 60 * 1000);
+
+        return differenceInDays >= 0 && differenceInDays <= 7;
+    }
+
+    private void handleException(Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
     }
 }
