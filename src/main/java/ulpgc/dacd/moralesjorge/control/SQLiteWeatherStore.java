@@ -16,7 +16,24 @@ public class SQLiteWeatherStore implements WeatherStore {
 
     private void createDatabase() {
         try (Connection connection = DriverManager.getConnection(DATABASE_URL)) {
-            String createSQL = "CREATE TABLE IF NOT EXISTS Weather (" +
+            System.out.println("Connected to the database");
+            crateTable(connection, "LaGraciosa");
+            crateTable(connection, "Lanzarote");
+            crateTable(connection, "Fuerteventura");
+            crateTable(connection, "GranCanaria");
+            crateTable(connection, "Tenerife");
+            crateTable(connection, "LaGomera");
+            crateTable(connection, "LaPalma");
+            crateTable(connection, "ElHierro");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error Creating the DataBase", e);
+        }
+    }
+
+    private void crateTable(Connection connection, String islandName) {
+            String createSQL = "CREATE TABLE IF NOT EXISTS " + islandName + "_Weather (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "temperature REAL," +
                     "humidity REAL," +
@@ -27,17 +44,20 @@ public class SQLiteWeatherStore implements WeatherStore {
                     "time TEXT)";
             try (Statement statement = connection.createStatement()) {
                 statement.execute(createSQL);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al crear la base de datos", e);
-        }
     }
 
+
     @Override
-    public void saveWeather(Location location, Instant timestamp, Weather weather) throws Exception {
+    public void saveWeather(Location location, Instant timestamp, Weather weather) {
+        String islandName = location.getIsland();
+        String tableName = islandName + "_Weather";
+
         try (Connection connection = DriverManager.getConnection(DATABASE_URL)){
-            String insertSQL = "INSERT INTO Weather (temperature, humidity, precipitation, wind_speed, clouds, location, time) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            connection.setAutoCommit(false);
+            String insertSQL = "INSERT INTO " + tableName + " (temperature, humidity, precipitation, wind_speed, clouds, location, time) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(insertSQL)) {
                 statement.setDouble(1, weather.getTemperature());
@@ -49,10 +69,12 @@ public class SQLiteWeatherStore implements WeatherStore {
                 statement.setString(7, weather.getTimestamp());
 
                 statement.executeUpdate();
-
+                connection.commit();
             }
+            connection.commit();
         } catch (SQLException e) {
-            throw new RuntimeException("Error al insertar datos en la base de datos", e);
+            e.printStackTrace();
+            throw new RuntimeException("Error inserting data into the database", e);
         }
 
     }

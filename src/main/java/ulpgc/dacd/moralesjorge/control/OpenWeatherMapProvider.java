@@ -67,7 +67,6 @@ public class OpenWeatherMapProvider implements WeatherProvider {
 
     List<Weather> parseWeatherData(String jsonResponse) throws ParseException {
         List<Weather> weatherList = new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         JsonParser parser = new JsonParser();
         JsonObject responseObject = parser.parse(jsonResponse).getAsJsonObject();
@@ -84,11 +83,13 @@ public class OpenWeatherMapProvider implements WeatherProvider {
                 double humidity = main.getAsJsonPrimitive("humidity").getAsDouble();
                 double wind_speed = weatherData.getAsJsonObject().getAsJsonObject("wind").get("speed").getAsDouble();
                 double clouds = weatherData.getAsJsonObject().getAsJsonObject("clouds").get("all").getAsDouble();
+                JsonElement popElement = main.get("pop");
+                double precipitation = (popElement != null && !popElement.isJsonNull()) ? popElement.getAsDouble() : 0.0;
 
-                Location location_api = new Location("Gran Canaria", 28.12, -15.43);
+                Location location_api = new Location("GranCanaria", 28.12, -15.43);
 
 
-                Weather weather = new Weather(temperature, humidity, 0, wind_speed, clouds, location_api, dataTimeString);
+                Weather weather = new Weather(temperature, humidity,precipitation, wind_speed, clouds, location_api, dataTimeString);
                 weatherList.add(weather);
             }
         }
@@ -99,7 +100,7 @@ public class OpenWeatherMapProvider implements WeatherProvider {
         return dateTimeString.endsWith("12:00:00");
     }
 
-    private boolean isWithinNext7Days(String dateTimeString) throws ParseException, ParseException {
+    private boolean isWithinNext7Days(String dateTimeString) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date currentDate = new Date();
         Date weatherDate = dateFormat.parse(dateTimeString);
