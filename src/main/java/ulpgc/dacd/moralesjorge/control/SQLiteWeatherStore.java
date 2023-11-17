@@ -3,6 +3,8 @@ package ulpgc.dacd.moralesjorge.control;
 import ulpgc.dacd.moralesjorge.model.Location;
 import ulpgc.dacd.moralesjorge.model.Weather;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.time.Instant;
 
@@ -33,20 +35,20 @@ public class SQLiteWeatherStore implements WeatherStore {
     }
 
     private void crateTable(Connection connection, String islandName) {
-            String createSQL = "CREATE TABLE IF NOT EXISTS " + islandName + "_Weather (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    "temperature REAL," +
-                    "humidity REAL," +
-                    "precipitation REAL," +
-                    "wind_speed REAL," +
-                    "clouds REAL," +
-                    "location TEXT," +
-                    "time TEXT)";
-            try (Statement statement = connection.createStatement()) {
-                statement.execute(createSQL);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+        String createSQL = "CREATE TABLE IF NOT EXISTS " + islandName + "_Weather (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "temperature REAL," +
+                "humidity REAL," +
+                "precipitation REAL," +
+                "wind_speed REAL," +
+                "clouds REAL," +
+                "location TEXT," +
+                "time TEXT)";
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(createSQL);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -60,12 +62,13 @@ public class SQLiteWeatherStore implements WeatherStore {
             String insertSQL = "INSERT INTO " + tableName + " (temperature, humidity, precipitation, wind_speed, clouds, location, time) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement statement = connection.prepareStatement(insertSQL)) {
-                statement.setDouble(1, weather.getTemperature());
+                double temperature = round(weather.getTemperature() - 273.15);
+                statement.setDouble(1, temperature);
                 statement.setDouble(2, weather.getHumidity());
                 statement.setDouble(3, weather.getRain());
                 statement.setDouble(4, weather.getWind());
                 statement.setDouble(5, weather.getClouds());
-                statement.setString(6, weather.getLocation().toString());
+                statement.setString(6, weather.getLocation().getIsland());
                 statement.setString(7, weather.getTimestamp());
 
                 statement.executeUpdate();
@@ -76,6 +79,11 @@ public class SQLiteWeatherStore implements WeatherStore {
             e.printStackTrace();
             throw new RuntimeException("Error inserting data into the database", e);
         }
+    }
 
+    private double round(double value) {
+        BigDecimal number = new BigDecimal(value);
+        number = number.setScale(2, RoundingMode.HALF_UP);
+        return number.doubleValue();
     }
 }
