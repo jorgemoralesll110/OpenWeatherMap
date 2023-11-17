@@ -10,6 +10,8 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class WeatherController {
@@ -20,6 +22,7 @@ public class WeatherController {
     public WeatherController() {
         this.weatherProvider = new OpenWeatherMapProvider();
         this.weatherStore = new SQLiteWeatherStore();
+        scheduleTask();
     }
 
     public void execute() {
@@ -74,4 +77,20 @@ public class WeatherController {
 
         return weatherList;
     }
+
+    private void scheduleTask() {
+        Timer timer = new Timer();
+
+        long delay = 0;
+        long period = 15000;
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                execute();
+            }
+        };
+        timer.scheduleAtFixedRate(task, delay, period);
+    }
 }
+
