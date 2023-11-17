@@ -74,7 +74,6 @@ public class WeatherController {
                 e.printStackTrace();
             }
         }
-
         return weatherList;
     }
 
@@ -82,14 +81,14 @@ public class WeatherController {
         Timer timer = new Timer();
 
         long delay = 0;
-        long period = 15000;
+        long period = 6*3600*1000;
 
         TimerTask task = new TimerTask() {
-            @Override
             public void run() {
                 execute();
             }
         };
+
         timer.scheduleAtFixedRate(task, delay, period);
     }
 }
