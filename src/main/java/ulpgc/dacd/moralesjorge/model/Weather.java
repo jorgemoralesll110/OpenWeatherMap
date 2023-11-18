@@ -1,6 +1,6 @@
 package ulpgc.dacd.moralesjorge.model;
 
-import java.sql.Timestamp;
+
 
 public class Weather {
     private double temperature;
