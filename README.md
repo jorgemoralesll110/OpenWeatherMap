@@ -1,5 +1,5 @@
 # Firs practice: OpenWeatherMap
-![image](https://github.com/jorgemoralesll110/OpenWeatherMap/assets/132004580/260c8be0-fb04-4ac0-a0f1-cdfacb5e0949)
+![image](https://github.com/jorgemoralesll110/OpenWeatherMap/assets/132004580/99948df5-829d-45e0-bf10-d3ce8e7a728a)
 
 
 ## Academic Information
@@ -36,7 +36,7 @@ The objective of this practice is learn how can we retrieve and store weather da
 The project follows SOLID design principles and utilizes design patterns pattern to ensure code efficiency and maintainability.
 
 ## Class Diagram
-![image](https://github.com/jorgemoralesll110/OpenWeatherMap/assets/132004580/8aefd374-9454-4b84-ad81-3b3904f6c875)
+![image](https://github.com/jorgemoralesll110/OpenWeatherMap/assets/132004580/081e217c-3074-43d6-a97e-4c34cf75f7cb)
 
 ### Autor
 Jorge Morales Llerandi
