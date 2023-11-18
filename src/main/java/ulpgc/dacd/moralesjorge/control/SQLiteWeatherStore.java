@@ -8,6 +8,8 @@ import java.math.RoundingMode;
 import java.sql.*;
 import java.time.Instant;
 
+
+
 public class SQLiteWeatherStore implements WeatherStore {
 
     private static final String DATABASE_URL = "jdbc:sqlite:OpenWeatherMap.db";
@@ -74,7 +76,6 @@ public class SQLiteWeatherStore implements WeatherStore {
                 statement.executeUpdate();
                 connection.commit();
             }
-            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Error inserting data into the database", e);

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
+
 public class OpenWeatherMapProvider implements WeatherProvider {
     private static final String TEMPLATE_URL = "https://api.openweathermap.org/data/2.5/forecast";
     private static final String API_KEY = "44cbf52007efea1adb20817923cf5c15";
@@ -23,10 +25,6 @@ public class OpenWeatherMapProvider implements WeatherProvider {
 
     public OpenWeatherMapProvider() {
         this.weatherList = new ArrayList<>();
-    }
-
-    public List<Weather> getWeatherList() {
-        return weatherList;
     }
 
     public String getWeather(Location location, Instant timestamp) {
@@ -87,7 +85,6 @@ public class OpenWeatherMapProvider implements WeatherProvider {
                 double precipitation = (popElement != null && !popElement.isJsonNull()) ? popElement.getAsDouble() : 0.0;
 
                 Location location_api = new Location("GranCanaria", 28.12, -15.43);
-
 
                 Weather weather = new Weather(temperature, humidity,precipitation, wind_speed, clouds, location_api, dataTimeString);
                 weatherList.add(weather);

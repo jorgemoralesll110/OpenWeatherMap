@@ -3,15 +3,14 @@ package ulpgc.dacd.moralesjorge.control;
 import ulpgc.dacd.moralesjorge.model.Location;
 import ulpgc.dacd.moralesjorge.model.Weather;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
 
 
 public class WeatherController {
@@ -26,7 +25,7 @@ public class WeatherController {
     }
 
     public void execute() {
-        List<Location> locations = locationsFromFile("C:\\Users\\tomas\\Desktop\\DACD\\OpenWeatherMap\\src\\main\\resources\\locations.csv");
+        List<Location> locations = locationsFromFile("locations.csv");
 
         for (Location location : locations) {
             try {
@@ -34,17 +33,19 @@ public class WeatherController {
                 String APIResponse = weatherProvider.getWeather(location, timestamp);
                 List<Weather> weatherList = parseAndSaveData(location, timestamp, APIResponse);
 
-
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public static List<Location> locationsFromFile(String path) {
+    public static List<Location> locationsFromFile(String filename) {
         List<Location> locations = new ArrayList<>();
 
-        try (BufferedReader file = new BufferedReader(new FileReader(path))) {
+        ClassLoader classLoader = WeatherController.class.getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(filename);
+
+        try (BufferedReader file = new BufferedReader(new BufferedReader((new InputStreamReader(inputStream))))) {
             String line;
             while ((line = file.readLine()) != null) {
                 String[] data = line.split(",");
@@ -56,10 +57,10 @@ public class WeatherController {
                 locations.add(location);
             }
         } catch (FileNotFoundException e) {
-            System.err.println("Error: File not Found: " + path);
+            System.err.println("Error: File not Found: " + filename);
             e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("Error reading the File: " + path);
+            System.err.println("Error reading the File: " + filename);
             e.printStackTrace();
         }
         return locations;
@@ -89,8 +90,6 @@ public class WeatherController {
                 execute();
             }
         };
-
         timer.scheduleAtFixedRate(task, delay, period);
     }
 }
-
