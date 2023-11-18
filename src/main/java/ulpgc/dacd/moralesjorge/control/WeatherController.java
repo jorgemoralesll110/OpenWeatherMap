@@ -34,6 +34,7 @@ public class WeatherController {
                 String APIResponse = weatherProvider.getWeather(location, timestamp);
                 List<Weather> weatherList = parseAndSaveData(location, timestamp, APIResponse);
 
+
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
