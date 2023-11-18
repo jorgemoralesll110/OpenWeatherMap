@@ -75,7 +75,7 @@ public class OpenWeatherMapProvider implements WeatherProvider {
             JsonObject weatherData = list.get(i).getAsJsonObject();
             String dataTimeString = weatherData.get("dt_txt").getAsString();
 
-            if (isMidday(dataTimeString) && isWithinNext7Days(dataTimeString)) {
+            if (isMidday(dataTimeString) && isWithinNext5Days(dataTimeString)) {
                 JsonObject main = weatherData.getAsJsonObject("main");
                 double temperature = main.getAsJsonPrimitive("temp").getAsDouble();
                 double humidity = main.getAsJsonPrimitive("humidity").getAsDouble();
@@ -97,7 +97,7 @@ public class OpenWeatherMapProvider implements WeatherProvider {
         return dateTimeString.endsWith("12:00:00");
     }
 
-    private boolean isWithinNext7Days(String dateTimeString) throws ParseException {
+    private boolean isWithinNext5Days(String dateTimeString) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date currentDate = new Date();
         Date weatherDate = dateFormat.parse(dateTimeString);
@@ -105,7 +105,7 @@ public class OpenWeatherMapProvider implements WeatherProvider {
         long differenceInMilliseconds = weatherDate.getTime() - currentDate.getTime();
         long differenceInDays = differenceInMilliseconds / (24 * 60 * 60 * 1000);
 
-        return differenceInDays >= 0 && differenceInDays <= 7;
+        return differenceInDays >= 0 && differenceInDays <= 5;
     }
 
     private void handleException(Exception e) {
